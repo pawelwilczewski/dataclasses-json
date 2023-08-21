@@ -314,16 +314,16 @@ def _decode_generic(type_, value, infer_missing):
                 # already decoded
                 res = value
             else:
-                # FIXME if all types in the union are dataclasses this
-                #  will just pick the first option -
-                #  maybe find the best fitting class in that case instead?
                 res = value
                 changed = False
                 for type_option in type_options:
                     if is_dataclass(type_option):
-                        res = _decode_dataclass(type_option, value, infer_missing)
-                        changed = True
-                        break
+                        try:
+                            res = _decode_dataclass(type_option, value, infer_missing)
+                            changed = True
+                            break
+                        except (KeyError, ValueError):
+                            continue
                 if not changed:
                     warnings.warn(
                         f"Failed encoding {value} Union dataclasses."
